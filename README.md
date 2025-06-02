@@ -76,7 +76,7 @@ Generates dynamic random values using regex.
 ```gherkin
 Given generate random values
 | username:string | [a-z]{8} |
-| id:number       | \d{5}    |
+| id:integer       | \d{5}    |
 ```
 
 Generated values are stored in the context and can be reused.
@@ -123,7 +123,7 @@ Extracts values from the response JSON body and stores them in context.
 
 ```gherkin
 Then extract values from response
-| $.user.id   | userId:number |
+| $.user.id   | userId:integer |
 | $.user.name | username      |
 ```
 
@@ -144,7 +144,7 @@ This will resolve `{authToken}` from a value previously stored in the context.
 
 ### Type Conversion
 
-Supports type annotations via the `key:type` format (e.g., `userId:number`). Values are automatically type-converted
+Supports type annotations via the `key:type` format (e.g., `userId:integer`). Values are automatically type-converted
 using `TypeConverter`.
 
 ---
@@ -186,7 +186,7 @@ Feature: User API
     When send a POST request
     Then validate status code of 201
     And extract values from response
-      | $.id | userId:number |
+      | $.id | userId:integer |
 ```
 
 ---
@@ -201,5 +201,3 @@ Ensure the following helper components exist and are available via context:
 * `TypeConverter`: For value type conversion
 * `SchemaValidator`: For JSON schema validation
 * `PathExtractor`: For extracting fields from JSON response
-
-Let me know if you’d like a Kotlin/Gradle version or export this guide to Markdown format!
