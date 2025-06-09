@@ -1,11 +1,6 @@
 package definitions;
 
-import api.AsyncRestClient;
-import api.SchemaValidator;
-import api.Context;
-import api.PathExtractor;
-import api.RegexGenerator;
-import api.TypeConverter;
+import api.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,6 +53,15 @@ public class Steps {
         context.set("pathParameters", pathParameters);
     }
 
+    @Given("add to form parameters")
+    public void addToFormParameters(Map<String, String> input) {
+        var params = mapToLowerCase(input);
+        var existing = context.get("formParameters", Map.class);
+        var formParameters = new HashMap<String, Object>(existing != null ? existing : Map.of());
+        resolveParameterizedMapValues(params, formParameters);
+        context.set("formParameters", formParameters);
+    }
+
     @Given("add to query parameters")
     public void addToQueryParameters(Map<String, String> input) {
         var params = mapToLowerCase(input);
@@ -96,6 +100,7 @@ public class Steps {
         String baseUrl = context.get("baseUrl", String.class);
         var headers = context.get("headers", Map.class);
         var pathParameters = context.get("pathParameters", Map.class);
+        var formParameters = context.get("formParameters", Map.class);
         var queryParameters = context.get("queryParameters", Map.class);
         String endpoint = context.get("endpoint", String.class);
         Object body = context.get("body", Object.class);
@@ -106,6 +111,7 @@ public class Steps {
                 headers,
                 pathParameters,
                 queryParameters,
+                formParameters,
                 body
         );
         context.set("response", response);

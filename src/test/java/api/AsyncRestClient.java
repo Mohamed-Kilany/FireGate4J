@@ -40,6 +40,7 @@ public class AsyncRestClient {
             Map<String, String> headers,
             Map<String, String> pathParams,
             Map<String, String> queryParams,
+            Map<String, String> formParams,
             Object body) {
 
         Instant start = Instant.now();
@@ -61,10 +62,23 @@ public class AsyncRestClient {
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
                 .uri(URI.create(url));
 
-        requestBuilder.method(method,
-                body != null
-                        ? HttpRequest.BodyPublishers.ofString(serializeBody(body))
-                        : HttpRequest.BodyPublishers.noBody());
+        HttpRequest.BodyPublisher bodyPublisher;
+
+        if (body != null) {
+            bodyPublisher = HttpRequest.BodyPublishers.ofString(body.toString());
+        } else {
+            bodyPublisher = HttpRequest.BodyPublishers.noBody();
+        }
+
+        if (formParams != null && !formParams.isEmpty()) {
+            String formBody = formParams.entrySet().stream()
+                    .map(entry -> URLEncoder.encode(entry.getKey(), StandardCharsets.UTF_8) + "=" +
+                            URLEncoder.encode(entry.getValue(), StandardCharsets.UTF_8))
+                    .collect(Collectors.joining("&"));
+            bodyPublisher = HttpRequest.BodyPublishers.ofString(formBody);
+        }
+
+        requestBuilder.method(method, bodyPublisher);
 
         if (headers != null && !headers.isEmpty()) {
             headers.forEach(requestBuilder::header);
