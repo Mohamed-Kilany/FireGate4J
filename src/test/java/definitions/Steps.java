@@ -37,46 +37,41 @@ public class Steps {
 
     @Given("add to headers")
     public void addToHeaders(Map<String, String> input) {
-        var params = mapToLowerCase(input);
         var existing = context.get("headers", Map.class);
         var headers = new HashMap<String, Object>(existing != null ? existing : Map.of());
-        resolveParameterizedMapValues(params, headers);
+        resolveParameterizedMapValues(input, headers);
         context.set("headers", headers);
     }
 
     @Given("add to path parameters")
     public void addToPathParameters(Map<String, String> input) {
-        var params = mapToLowerCase(input);
         var existing = context.get("pathParameters", Map.class);
         var pathParameters = new HashMap<String, Object>(existing != null ? existing : Map.of());
-        resolveParameterizedMapValues(params, pathParameters);
+        resolveParameterizedMapValues(input, pathParameters);
         context.set("pathParameters", pathParameters);
     }
 
     @Given("add to form parameters")
     public void addToFormParameters(Map<String, String> input) {
-        var params = mapToLowerCase(input);
         var existing = context.get("formParameters", Map.class);
         var formParameters = new HashMap<String, Object>(existing != null ? existing : Map.of());
-        resolveParameterizedMapValues(params, formParameters);
+        resolveParameterizedMapValues(input, formParameters);
         context.set("formParameters", formParameters);
     }
 
     @Given("add to query parameters")
     public void addToQueryParameters(Map<String, String> input) {
-        var params = mapToLowerCase(input);
         var existing = context.get("queryParameters", Map.class);
         var queryParameters = new HashMap<String, Object>(existing != null ? existing : Map.of());
-        resolveParameterizedMapValues(params, queryParameters);
+        resolveParameterizedMapValues(input, queryParameters);
         context.set("queryParameters", queryParameters);
     }
 
     @Given("add to body")
     public void addToBody(Map<String, String> input) {
-        var params = mapToLowerCase(input);
         var existing = context.get("body", Map.class);
         var body = new HashMap<String, Object>(existing != null ? existing : Map.of());
-        resolveParameterizedMapValues(params, body);
+        resolveParameterizedMapValues(input, body);
         context.set("body", body);
     }
 
@@ -131,7 +126,6 @@ public class Steps {
 
     @Then("extract values from response")
     public void extractValuesFromResponse(Map<String, String> input) {
-        var values = mapToLowerCase(input);
         HttpResponse<String> response = (HttpResponse<String>) context.get("response", CompletableFuture.class).join();
         PathExtractor extractor = context.get("PathExtractor", PathExtractor.class);
         JsonNode root;
@@ -141,19 +135,13 @@ public class Steps {
             throw new RuntimeException(e);
         }
 
-        values.forEach((jsonPath, k) -> {
+        input.forEach((jsonPath, k) -> {
             String[] parts = k.split(":");
             String key = parts[0];
             String type = parts.length > 1 ? parts[1] : "string";
             Object value = extractor.extractByPath(root, jsonPath, key, type);
             context.set(key, value);
         });
-    }
-
-    private Map<String, String> mapToLowerCase(Map<String, String> input) {
-        return input.entrySet().stream().collect(Collectors.toMap(
-                entry -> entry.getKey().toLowerCase(),
-                entry -> entry.getValue().toLowerCase()));
     }
 
     private void resolveParameterizedMapValues(Map<String, String> source, Map<String, Object> target) {
